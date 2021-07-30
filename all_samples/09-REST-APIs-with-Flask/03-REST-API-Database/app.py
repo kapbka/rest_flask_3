@@ -1,9 +1,9 @@
 import os
 from flask import Flask,  request, jsonify
 from flask_sqlalchemy import SQLAlchemy
-from flask_restful import Api,Resource
-from secure_check import authenticate,identity
-from flask_jwt import JWT ,jwt_required
+from flask_restful import Api, Resource
+from secure_check import authenticate, identity
+from flask_jwt import JWT, jwt_required
 from flask_migrate import Migrate
 
 
@@ -20,7 +20,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'da
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
-Migrate(app,db)
+Migrate(app, db)
 jwt = JWT(app, authenticate, identity)
 api = Api(app)
 
@@ -30,8 +30,7 @@ api = Api(app)
 
 
 class Puppy(db.Model):
-    name = db.Column(db.String(80),primary_key=True)
-
+    name = db.Column(db.String(80), primary_key=True)
 
     def __init__(self,name):
         self.name=name
@@ -40,14 +39,14 @@ class Puppy(db.Model):
         return {'name': self.name}
 
     def __str__(self):
-        return f"{self.name} "
+        return f"{self.name}"
 
 ###################################################
 ################ RESOURCES ###########################
 ##################################################
 
 class PuppyResource(Resource):
-    def get(self,name):
+    def get(self, name):
 
         pup = Puppy.query.filter_by(name=name).first()
 
@@ -55,9 +54,9 @@ class PuppyResource(Resource):
             return pup.json()
         else:
             # If you request a puppy not yet in the puppies list
-            return {'name':'not found'}, 404
+            return {'name': 'not found'}, 404
 
-    def post(self,name):
+    def post(self, name):
 
         pup = Puppy(name=name)
         db.session.add(pup)
@@ -65,16 +64,13 @@ class PuppyResource(Resource):
 
         return pup.json()
 
-
-    def delete(self,name):
+    def delete(self, name):
 
         pup = Puppy.query.filter_by(name=name).first()
         db.session.delete(pup)
         db.session.commit()
 
-        return {'note':'delete successful'}
-
-
+        return {'note': 'delete successful'}
 
 
 class AllPuppies(Resource):
@@ -89,7 +85,7 @@ class AllPuppies(Resource):
 
 
 api.add_resource(PuppyResource, '/puppy/<string:name>')
-api.add_resource(AllPuppies,'/puppies')
+api.add_resource(AllPuppies, '/puppies')
 
 if __name__ == '__main__':
     app.run(debug=True)
